@@ -13,6 +13,12 @@
 import subprocess
 import time
 
+#------------------------------------------------------------
+#	runsSys()
+#		Description: Executes a system command and returns 
+#           the output from stdout. Raises a SystemError 
+#           exception if the command outputs to stderr.
+#------------------------------------------------------------
 def runSys(inputCommand: str):
     out = subprocess.Popen(inputCommand, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     stdout, stderr = out.communicate()
@@ -21,6 +27,12 @@ def runSys(inputCommand: str):
         raise SystemError(errorMsg)
     return stdout.decode('utf-8').strip()
 
+#------------------------------------------------------------
+#	getIPs()
+#		Description: returns a dictionary containing the 
+#           logical names (key) of available NIC's and their 
+#           corresponding IP's (value) if available. 
+#------------------------------------------------------------
 def getIPs():
     out = runSys('ifconfig | grep -E "BROADCAST|netmask"')
     outLines = out.splitlines()
@@ -35,6 +47,13 @@ def getIPs():
             ips[nicName] = address
     return ips
 
+#------------------------------------------------------------
+#	checkConnections()
+#		Description: adjusts the values of the dictionary 
+#           returned from getIPs() to reflect any new IP 
+#           connections if acquired. Will take at most 1 second
+#           if no connection.
+#------------------------------------------------------------
 def checkConnections(iPs: dict):
     for nic in iPs.keys():
         if ('No Connection' in iPs[nic]):

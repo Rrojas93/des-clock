@@ -13,15 +13,23 @@
 #=========================================================================
 
 import PySimpleGUI as sg 
+import DeskClockUtilities as utils
 sg.theme('DarkAmber')
 
-# Raspberry Pi TS Res. = (800, 480)
+
+_fixedResolution = (800, 480) # fixed resolution size for RPi Touch screen
 _screenResolution = sg.Window.get_screen_size()
+_screenResolution = _fixedResolution # Used to test and debug, comment out for variable screen sizes.
 _mainFontType = 'Calibri'
 _mainFontPair = (_mainFontType, 12)
 
 window = None
 
+#------------------------------------------------------------
+#	main()
+#		Description: Main function for the program. Called
+#           by "if __name__ == __main__" @ gottom of file.
+#------------------------------------------------------------
 def main():
     createMainWindow(getMainLayout())
     while (True):
@@ -30,11 +38,13 @@ def main():
             window.close()
             break
         else:
-            handleMainWindowEvents(event, values)
+            mainWinEvents(event, values)
+            updateGUI()
 
-def handleMainWindowEvents(event, values):
-    pass
-
+#------------------------------------------------------------
+#	createMainWindow()
+#		Description: Creates the main window of the application.
+#------------------------------------------------------------
 def createMainWindow(layout):
     global window 
     window = sg.Window(
@@ -52,12 +62,33 @@ def createMainWindow(layout):
         element_justification='center'
         )
 
+#------------------------------------------------------------
+#	getMainLayout()
+#		Description: returns the layout of the main 
+#           GUI window.
+#------------------------------------------------------------
 def getMainLayout():
     layout = [
-        [sg.Text('Desk Clock App', font=(_mainFontType, 16), )],
+        [sg.Text('<time>', key='-text.time-', font=(_mainFontType, 16)), sg.Text('<ampm>', key='-text.ampm-', font=(_mainFontType, 16))],
         [sg.Exit(key='-button.Exit-')]
     ]
     return layout
+
+#------------------------------------------------------------
+#	mainWinEvents()
+#		Description: handles any GUI events
+#           from the main window of the application.
+#------------------------------------------------------------
+def mainWinEvents(event, values):
+    pass
+
+#------------------------------------------------------------
+#	updateGUI()
+#		Description: Performs any GUI visual updates to the
+#           main window. 
+#------------------------------------------------------------
+def updateGUI():
+    pass
 
 if __name__ == "__main__":
     main()
