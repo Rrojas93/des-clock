@@ -11,6 +11,7 @@
 #=========================================================================
 
 import subprocess
+import time
 
 def runSys(inputCommand: str):
     out = subprocess.Popen(inputCommand, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -49,6 +50,19 @@ def checkConnections(iPs: dict):
                 iPs[nic] = 'No Connection'
             else:
                 continue
+
+#------------------------------------------------------------
+#	getTime()
+#		Description: Returns a tuple (size of 2) representing the current
+#           time. First element in tuple is the time, second element 
+#           is "am" or "pm"
+#------------------------------------------------------------
+def getTime(militaryTime=False):
+    tStruct = time.localtime(time.time())
+    hour = tStruct.tm_hour - 12 if tStruct.tm_hour > 12 and not(militaryTime) else tStruct.tm_hour
+
+    return '{}:{}'.format(hour, tStruct.tm_min)
+
 
 if __name__ == "__main__":
     pass
