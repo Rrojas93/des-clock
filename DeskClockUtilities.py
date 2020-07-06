@@ -58,10 +58,11 @@ def checkConnections(iPs: dict):
 #           is "am" or "pm"
 #------------------------------------------------------------
 def getTime(militaryTime=False):
-    tStruct = time.localtime(time.time())
-    hour = tStruct.tm_hour - 12 if tStruct.tm_hour > 12 and not(militaryTime) else tStruct.tm_hour
-
-    return '{}:{}'.format(hour, tStruct.tm_min)
+    t = time.localtime(time.time())
+    ampm = 'pm' if t.tm_hour >= 12 else 'am'
+    hour = t.tm_hour - 12 if t.tm_hour > 12 and not(militaryTime) else t.tm_hour
+    hour = 12 if hour == 0 and not(militaryTime) else hour
+    return (f'{hour}:{t.tm_min}', ampm)
 
 
 if __name__ == "__main__":
