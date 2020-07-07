@@ -14,8 +14,8 @@
 
 import PySimpleGUI as sg 
 import DeskClockUtilities as utils
+import DeskClockSettings 
 sg.theme('DarkAmber') # nicer color theme
-
 
 _fixedResolution = (800, 480) # fixed resolution size for RPi Touch screen
 _screenResolution = sg.Window.get_screen_size()
@@ -25,7 +25,7 @@ _mainFontPair = (_mainFontType, 16)
 
 
 window = None # main window of application.
-
+settings = DeskClockSettings.loadSettings()
 
 #------------------------------------------------------------
 #	main()
@@ -42,6 +42,7 @@ def main():
         else:
             mainWinEvents(event, values)
             updateGUI() # updates visuals on every timout AND every user provoked event for responsiveness.
+    DeskClockSettings.saveSettings(settings) # save settings so that they persist on next load.
 
 #------------------------------------------------------------
 #	createMainWindow()
@@ -75,7 +76,7 @@ def getMainLayout():
     ampmFontSize = 24
     row_time = [[sg.Column(justification='center', layout=[[
         sg.Text('00:00', key='-text.time-', font=(_mainFontType, timeFontSize), pad=((0,0), (0,0))),
-        sg.Column(key='-column.ampm-',layout=[[sg.Text('PM', key='-text.ampm-', font=(_mainFontType, ampmFontSize), pad=((0,0), (45,0)))]])
+        sg.Column(key='-column.ampm-',layout=[[sg.Text('PM', key='-text.ampm-', font=(_mainFontType, ampmFontSize), pad=((0,0), (45,0)))]], visible=not(settings.enableMilitaryTime))
     ]])]]
     row_control = [[sg.Button('Military', key='-button.military-'), sg.Exit(key='-button.Exit-')]]
 
@@ -97,9 +98,8 @@ def mainWinEvents(event, values):
         # return since we know there are no user provoked events. 
         return
     if(event == '-button.military-'):
-        global showMilitaryTime
-        showMilitaryTime = not(showMilitaryTime)
-        window['-column.ampm-'].update(visible=not(showMilitaryTime))
+        settings.enableMilitaryTime = not(settings.enableMilitaryTime)
+        window['-column.ampm-'].update(visible=not(settings.enableMilitaryTime))
         updateTime()
 
     # The following should be any user provoked events.
@@ -122,9 +122,8 @@ def updateGUI():
 #           window. This function also blinks the colon
 #           in between the hour and minute after every sec.
 #------------------------------------------------------------
-showMilitaryTime = False
 def updateTime():
-    t, ap = utils.getTime(showMilitaryTime)
+    t, ap = utils.getTime(settings.enableMilitaryTime)
     tic = ':' if int(t.split(':')[-1]) % 2 == 0 else ' '
     window['-text.time-'].Update(tic.join(t.split(':')[:-1]))
     window['-text.ampm-'].Update(ap)
