@@ -83,5 +83,14 @@ def getTime(militaryTime=False):
     hour = 12 if hour == 0 and not(militaryTime) else hour
     return ('{0}:{1:0>2d}:{2:2}'.format(hour, t.tm_min, t.tm_sec), ampm)
 
+#------------------------------------------------------------
+#	getTimeZone()
+#		Description: Returns the local time zone.
+#------------------------------------------------------------
+def getTimeZone():
+    tz = time.localtime(time.time()).tm_zone
+    tz = ''.join([w[0] for w in tz.split(' ')]) # return time zone acronym
+    return tz
+
 if __name__ == "__main__":
     pass

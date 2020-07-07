@@ -1,3 +1,16 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
+#=========================================================================
+#	DeskClockSettings.py
+#	Author: Raul Rojas
+#	Contact: rrojas994@gmail.com
+#	Description: 
+#		Module providing a settings object for deskClock.py and allow for 
+#       user preference persistance.
+#=========================================================================
+
+
 import json
 
 class Settings():

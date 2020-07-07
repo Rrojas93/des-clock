@@ -73,11 +73,14 @@ def createMainWindow(layout):
 #------------------------------------------------------------
 def getMainLayout():
     timeFontSize = 64
-    ampmFontSize = 24
+    ampmFontSize = 20
     row_time = [[sg.Column(justification='center', layout=[[
         sg.Text('00:00', key='-text.time-', font=(_mainFontType, timeFontSize), pad=((0,0), (0,0))),
-        sg.Column(key='-column.ampm-',layout=[[sg.Text('PM', key='-text.ampm-', font=(_mainFontType, ampmFontSize), pad=((0,0), (45,0)))]], visible=not(settings.enableMilitaryTime))
-    ]])]]
+        sg.Column(element_justification='left', key='-column.timeSpecs-', pad=(10,0), layout=[
+            [sg.Text(utils.getTimeZone(), key='-text.timeZone-', font=(_mainFontType, int(ampmFontSize/2)), pad=((0,0),(15,15)))],
+            [sg.Text('PM', key='-text.ampm-', font=(_mainFontType, ampmFontSize), pad=((0,0), (0,0)), visible=not(settings.enableMilitaryTime))]
+            ])
+        ]])]]
     row_control = [[sg.Button('Military', key='-button.military-'), sg.Exit(key='-button.Exit-')]]
 
     layout = []
@@ -99,7 +102,7 @@ def mainWinEvents(event, values):
         return
     if(event == '-button.military-'):
         settings.enableMilitaryTime = not(settings.enableMilitaryTime)
-        window['-column.ampm-'].update(visible=not(settings.enableMilitaryTime))
+        window['-text.ampm-'].update(visible=not(settings.enableMilitaryTime))
         updateTime()
 
     # The following should be any user provoked events.
