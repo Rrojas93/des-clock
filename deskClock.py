@@ -74,7 +74,7 @@ def createMainWindow(layout):
 def getMainLayout():
     timeFontSize = 64
     ampmFontSize = 20
-    row_time = [[sg.Column(justification='center', layout=[[
+    row_time = [[sg.Column(justification='center', pad=(0, (100,0)), layout=[[
         sg.Text('00:00', key='-text.time-', font=(_mainFontType, timeFontSize), pad=((0,0), (0,0))),
         sg.Column(element_justification='left', key='-column.timeSpecs-', pad=(10,0), layout=[
             [sg.Text(utils.getTimeZone(), key='-text.timeZone-', font=(_mainFontType, int(ampmFontSize/2)), pad=((0,0),(15,15)))],
