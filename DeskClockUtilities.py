@@ -89,7 +89,9 @@ def getTime(militaryTime=False):
 #------------------------------------------------------------
 def getTimeZone():
     tz = time.localtime(time.time()).tm_zone
-    tz = ''.join([w[0] for w in tz.split(' ')]) # return time zone acronym
+    splitTz = tz.split(' ')
+    if(len(splitTz) > 1):
+        tz = ''.join([w[0] for w in splitTz]) # return time zone acronym
     return tz
 
 if __name__ == "__main__":
