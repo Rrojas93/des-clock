@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=DeskClock
+Comment=Launches deskClock.py
+Icon=/usr/share/pixmaps/openbox.xpm
+Exec=/home/pi/rr/scripts/DeskClock/deskClock.py
+Type=Application
+Encoding=UTF-8
+Terminal=False
