@@ -74,13 +74,25 @@ def createMainWindow(layout):
 def getMainLayout():
     timeFontSize = 64
     ampmFontSize = 20
-    row_time = [[sg.Column(justification='center', pad=(0, (100,0)), layout=[[
-        sg.Text('00:00', key='-text.time-', font=(_mainFontType, timeFontSize), pad=((0,0), (0,0))),
-        sg.Column(element_justification='left', key='-column.timeSpecs-', pad=(10,0), layout=[
-            [sg.Text(utils.getTimeZone(), key='-text.timeZone-', font=(_mainFontType, int(ampmFontSize/2)), pad=((0,0),(15,15)))],
-            [sg.Text('PM', key='-text.ampm-', font=(_mainFontType, ampmFontSize), pad=((0,0), (0,0)), visible=not(settings.enableMilitaryTime))]
-            ])
-        ]])]]
+    row_time = [[
+        sg.Column(element_justification='center', pad=(0,50), layout=[[
+            sg.Column(pad=((120,0), (0,0)), layout=[[
+                sg.Text('00:00', key='-text.altTime-', font=(_mainFontType, timeFontSize), pad=((0,0), (0,0))),
+                sg.Column(element_justification='left', key='-column.altTimeSpecs-', pad=(10,0), layout=[
+                    [sg.Text('PDT', key='-text.altTimeZone-', font=(_mainFontType, int(ampmFontSize/2)), pad=((0,0),(15,15)))],
+                    [sg.Text('PM', key='-text.altAmpm-', font=(_mainFontType, ampmFontSize), pad=((0,0), (0,0)), visible=not(settings.enableMilitaryTime))]
+                    ])
+                ]]),
+            sg.Column(pad=((40,0), (0,0)), layout=[[
+                sg.Text('00:00', key='-text.time-', font=(_mainFontType, timeFontSize), pad=((0,0), (0,0))),
+                sg.Column(element_justification='left', key='-column.timeSpecs-', pad=(10,0), layout=[
+                    [sg.Text(utils.getTimeZone(), key='-text.timeZone-', font=(_mainFontType, int(ampmFontSize/2)), pad=((0,0),(15,15)))],
+                    [sg.Text('PM', key='-text.ampm-', font=(_mainFontType, ampmFontSize), pad=((0,0), (0,0)), visible=not(settings.enableMilitaryTime))]
+                    ])
+                ]])
+            ]])
+        ]]
+
     row_control = [[sg.Button('Military', key='-button.military-'), sg.Exit(key='-button.Exit-')]]
 
     layout = []
@@ -103,6 +115,7 @@ def mainWinEvents(event, values):
     if(event == '-button.military-'):
         settings.enableMilitaryTime = not(settings.enableMilitaryTime)
         window['-text.ampm-'].update(visible=not(settings.enableMilitaryTime))
+        window['-text.altAmpm-'].update(visible=not(settings.enableMilitaryTime))
         updateTime()
 
     # The following should be any user provoked events.
@@ -130,6 +143,10 @@ def updateTime():
     tic = ':' if int(t.split(':')[-1]) % 2 == 0 else ' '
     window['-text.time-'].Update(tic.join(t.split(':')[:-1]))
     window['-text.ampm-'].Update(ap)
+
+    t, ap = utils.getTime(settings.enableMilitaryTime, adjust=-3)
+    tic = ':' if int(t.split(':')[-1]) % 2 == 0 else ' '
+    window['-text.altTime-'].Update(tic.join(t.split(':')[:-1]))
 
 if __name__ == "__main__":
     main()
