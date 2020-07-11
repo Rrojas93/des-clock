@@ -24,7 +24,7 @@ piIpAddress = secrets.rpi_ip_wlan_address # local ip address (from wifi connecti
 
 cnopts = secrets.cnopts
 ignore = [  # files to ignore when uploading
-    'Settings.json' # will be created automatically with defaults if missing. 
+    'Settings.json', # will be created automatically with defaults if missing. 
     'uploadFiles.py'
 ]
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #=========================================================================
-#	deskClock.py
+#	DeskClockGUI.py
 #	Author: Raul Rojas
 #	Contact: rrojas994@gmail.com
 #	Description: 
@@ -13,9 +13,10 @@
 #=========================================================================
 
 import PySimpleGUI as sg 
-import DeskClockUtilities as utils
+import TimeUtils
 import DeskClockSettings 
-sg.theme('DarkAmber') # nicer color theme
+sg.theme('DarkAmber') # nicer color theme. (placeholder)
+#TODO: add a theme picker feature.
 
 _fixedResolution = (800, 480) # fixed resolution size for RPi Touch screen
 _screenResolution = sg.Window.get_screen_size()
@@ -71,6 +72,7 @@ def createMainWindow(layout):
 #		Description: returns the layout of the main 
 #           GUI window.
 #------------------------------------------------------------
+#TODO: seperate different into row info themes and add them in by a preference layout chosen by user.
 def getMainLayout():
     timeFontSize = 64
     ampmFontSize = 20
@@ -86,7 +88,7 @@ def getMainLayout():
             sg.Column(pad=((40,0), (0,0)), layout=[[
                 sg.Text('00:00', key='-text.time-', font=(_mainFontType, timeFontSize), pad=((0,0), (0,0))),
                 sg.Column(element_justification='left', key='-column.timeSpecs-', pad=(10,0), layout=[
-                    [sg.Text(utils.getTimeZone(), key='-text.timeZone-', font=(_mainFontType, int(ampmFontSize/2)), pad=((0,0),(15,15)))],
+                    [sg.Text(TimeUtils.getTimeZone(), key='-text.timeZone-', font=(_mainFontType, int(ampmFontSize/2)), pad=((0,0),(15,15)))],
                     [sg.Text('PM', key='-text.ampm-', font=(_mainFontType, ampmFontSize), pad=((0,0), (0,0)), visible=not(settings.enableMilitaryTime))]
                     ])
                 ]])
@@ -139,12 +141,12 @@ def updateGUI():
 #           in between the hour and minute after every sec.
 #------------------------------------------------------------
 def updateTime():
-    t, ap = utils.getTime(settings.enableMilitaryTime)
+    t, ap = TimeUtils.getTime(settings.enableMilitaryTime)
     tic = ':' if int(t.split(':')[-1]) % 2 == 0 else ' '
     window['-text.time-'].Update(tic.join(t.split(':')[:-1]))
     window['-text.ampm-'].Update(ap)
 
-    t, ap = utils.getTime(settings.enableMilitaryTime, adjust=-3)
+    t, ap = TimeUtils.getTime(settings.enableMilitaryTime, adjust=-3)
     tic = ':' if int(t.split(':')[-1]) % 2 == 0 else ' '
     window['-text.altTime-'].Update(tic.join(t.split(':')[:-1]))
 
