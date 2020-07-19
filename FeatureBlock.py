@@ -25,8 +25,14 @@ import time
 class FeatureBlock(metaclass=abc.ABCMeta):
     globalKeySet = set()
 
-    def __init__(self):
-        self.safeKeys = self._generateSafeKeys(self.myFeaturesKeys())
+    def __init__(self, posRow, posCol):
+        ''' 
+        If you need to override to set your own features attributes, be sure to call "super().__init__()" as
+        these attributes may be necessary.
+        '''
+        self.safeKeys = self.__generateSafeKeys(self.myFeaturesKeys())
+        self.posRow = posRow
+        self.posCol = posCol
     
     @classmethod
     def __subclasshook__(cls, subclass):
@@ -36,7 +42,8 @@ class FeatureBlock(metaclass=abc.ABCMeta):
             hasattr(subclass, 'events') and callable(subclass.events) or 
             NotImplemented) 
 
-    def _generateSafeKeys(self, featuresKeys):
+    def __generateSafeKeys(self, featuresKeys):
+        '''Generates Safe keys'''
         safeKeys = dict()
         for k in featuresKeys:
             v = str(featuresKeys[k])
@@ -49,6 +56,12 @@ class FeatureBlock(metaclass=abc.ABCMeta):
             FeatureBlock.globalKeySet.add(v)
         return safeKeys
 
+    @abc.abstractmethod
+    def getFeatureDescription(self) -> str:
+        '''
+        A short description to be displayed in the layout manager describing your feature.
+        '''
+        raise NotImplementedError
     '''
     ----------------------------------------------------------------------------------------------------------
         To create safe keys that your feature can use, create a dictionary in which the dictonaries key and value
@@ -87,6 +100,43 @@ class FeatureBlock(metaclass=abc.ABCMeta):
         '''
         raise NotImplementedError
 
+    def __eq__(self, other):
+        if(self.posRow == other.posRow and self.posCol == other.posCol):
+            return True
+        else:
+            return False
+
+    def __lt__(self, other):
+        if(self.posRow < other.posRow):
+            if(self.posCol < other.posCol):
+                return True
+        return False
+    
+    def __le__(self, other):
+        if(self.posRow <= other.posRow):
+            if(self.posCol <= other.posCol):
+                return True
+        return False
+
+    def __gt__(self, other):
+        if(self.posRow > other.posRow):
+            if(self.posCol > other.posCol):
+                return True
+        return False
+    
+    def __ge__(self, other):
+        if(self.posRow >= other.posRow):
+            if(self.posCol >= other.posCol):
+                return True
+        return False
+
+    def __ne__(self, other):
+        if(self.posRow != other.posRow):
+            if(self.posCol != other.posCol):
+                return True
+        return False
+        
+
 '''
 ----------------------------------------------------------------------------------------------------------
     TestMyFeature(class, int, int)
@@ -121,7 +171,7 @@ def TestMyFeature(myFeatureClass, numOfRows=1, numOfInst=1):
     window = sg.Window(title='Your Feature Test', layout=layout, size=(800, 480), finalize=True, resizable=True)
     timed = False # used to time how long a timout event takes to handle feature block.
     while True:
-        event, values = window.read(100)
+        event, values = window.read(50)
         if(event != sg.TIMEOUT_EVENT and event != sg.WINDOW_CLOSED):
             print('\nEvent: ' + event + '\nValues: {}'.format(values))
         if(event == sg.WINDOW_CLOSED):
