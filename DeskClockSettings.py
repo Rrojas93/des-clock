@@ -14,8 +14,8 @@
 import json
 
 class Settings():
-    def __init__(self, enableMilitaryTime=True):
-        self.enableMilitaryTime = enableMilitaryTime
+    def __init__(self, **Settings):
+        self.settings = Settings
     
 
 #------------------------------------------------------------
@@ -23,9 +23,9 @@ class Settings():
 #		Description: Deserializes a saved settings object if
 #           it exists.
 #------------------------------------------------------------
-def loadSettings():
+def loadSettings(fPath='Settings.json'):
     try:
-        with open('Settings.json', 'r') as f:
+        with open(fPath, 'r') as f:
             settings = Settings(**json.load(f))
     except IOError:
         print('Settings file not found, loading default settings.')
@@ -36,9 +36,9 @@ def loadSettings():
 #	saveSettings(settings: Settings)
 #		Description: Serializes a settings object.
 #------------------------------------------------------------
-def saveSettings(settings_obj: Settings):
+def saveSettings(settings_obj: Settings, fPath='Settings.json'):
     inputType = str(type(settings_obj))
-    with open('Settings.json', 'w') as f:
+    with open(fPath, 'w') as f:
         if(inputType == "<class 'DeskClockSettings.Settings'>" or inputType == "<class '__main__.Settings'>"):
             json.dump(settings_obj.__dict__, f, indent=4)
         else:
