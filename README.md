@@ -13,9 +13,22 @@ shown on the screen and in what order.
 * Raspberry Pi 4
 * Official Raspberry Pi 7" [Touchscreen](https://www.raspberrypi.org/products/raspberry-pi-touch-display/)
 
+
 ### Progress Images
-Version 0.1:
+#### Version 0.1:
+* Basic functionality.
+* No modularity. 
+* Can switch between military/non military time
 
 ![Progress Image](/images/version_0.1/v0.1-Military.png)
 ![Progress Image](/images/version_0.1/v0.1-standard.png)
 
+
+#### Version 0.2:
+* Implemented modularity with "FeatureBlocks"
+* Added a layout manager with a basic interface.
+* Can select a layout with multiple feature blocks
+* Selected layouts will actually load the selected features.
+
+![Progress Image](/images/version_0.2/layout_manager.jpg)
+![Progress Image](/images/version_0.2/DeskClock_layouts.gif)
