@@ -101,39 +101,37 @@ class FeatureBlock(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     def __eq__(self, other):
-        if(self.posRow == other.posRow and self.posCol == other.posCol):
-            return True
-        else:
-            return False
+        return self.posRow == other.posRow and self.posCol == other.posCol
 
     def __lt__(self, other):
         if(self.posRow < other.posRow):
-            if(self.posCol < other.posCol):
-                return True
-        return False
+            return True
+        elif(self.posRow == other.posRow):
+            return self.posCol < other.posCol
+        else:
+            return False
     
     def __le__(self, other):
         if(self.posRow <= other.posRow):
-            if(self.posCol <= other.posCol):
-                return True
+            return self.posCol <= other.posCol
         return False
 
     def __gt__(self, other):
         if(self.posRow > other.posRow):
-            if(self.posCol > other.posCol):
-                return True
-        return False
+            return True
+        elif(self.posRow == other.posRow):
+            return self.posCol > other.posCol
+        else:
+            return False
     
     def __ge__(self, other):
         if(self.posRow >= other.posRow):
-            if(self.posCol >= other.posCol):
-                return True
+            return self.posCol >= other.posCol
         return False
 
     def __ne__(self, other):
         if(self.posRow != other.posRow):
-            if(self.posCol != other.posCol):
-                return True
+            return self.posCol != other.posCol
         return False
         
 
