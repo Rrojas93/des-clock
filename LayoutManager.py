@@ -1,9 +1,10 @@
 import sys, inspect
 import PySimpleGUI as sg 
 import VanillaFeatures
+from DeskClockWindows import DCWindow
 
-class LayoutManager():
-    def __init__(self, thirdPartyFeatures=None):
+class LayoutManager(DCWindow):
+    def start(self, thirdPartyFeatures=None):
         self.vanillaFeats = inspect.getmembers(VanillaFeatures, inspect.isclass)
         self.vanillaFeatsDict = {}
         for f in self.vanillaFeats:
@@ -27,17 +28,19 @@ class LayoutManager():
 
         self.window = sg.Window(
             title='Layout Manager', 
-            layout=self._getLayout(),
+            layout=self.windowLayout(),
             size=(800,480), 
             element_justification='center',
             finalize=True, 
-            font=('Everson Mono', 10)
+            font=('Everson Mono', 10), 
+            keep_on_top=False, 
+            no_titlebar=True
         )
         for f in self.activeFeatures:
             f.update(visible=False)
         self.window.finalize()
 
-    def _getLayout(self):
+    def windowLayout(self):
         availableList = [[f] for f in self.availableFeatures]
         activeList = [[f] for f in self.activeFeatures]
         infoSize = (self.boxDimensions[0]*2+59,70)
@@ -67,7 +70,7 @@ class LayoutManager():
                 ])
             ]])]])],
             [sg.Column(justification='center', element_justification='center', layout=[[
-                sg.Button('Save and Apply', key='button.saveExit'),
+                sg.Button('Save and Apply', key='-button.layouts.save-'),
                 sg.Button('Exit', key='button.exit')
             ]])],
             [sg.Column(element_justification='center', justification='center', layout=[
@@ -76,9 +79,6 @@ class LayoutManager():
         ])]]
         return layout
 
-    def read(self, timeout=None):
-        return self.window.read(timeout=timeout)
-    
     def addElementToActive(self, element: sg.Button):
         if(len(self.activeFeatures) != self.nextAvailableIndex): # not at last index.
             self.activeFeatures[self.nextAvailableIndex].update(text=element.GetText(), visible=True)
@@ -108,10 +108,6 @@ class LayoutManager():
         element = element
 
     def handleEvents(self, event, values):
-        if(event == sg.WINDOW_CLOSED or event == 'button.exit'):
-            self.window.close()
-            return False # close program
-
         # button selected
         if(event[:17] == 'button.available.'):
             self.focusButton(self._getElementWithKey(self.availableFeatures, event))
@@ -173,7 +169,7 @@ class LayoutManager():
         feats = []
         row = 0
         col = 0
-        for i, button in enumerate(self.activeFeatures):
+        for i, button in enumerate(self.activeFeatures[:self.nextAvailableIndex]):
             feats.append(self.vanillaFeatsDict[button.GetText()](row, col, timeAdjust=i))
             if(i >= (self.numOfCol-1)+(row * self.numOfCol)):
                 row += 1
@@ -183,12 +179,12 @@ class LayoutManager():
         return feats
 
 
-layouts = LayoutManager()
-exitApp = False
-while(not(exitApp)):
-    event, values = layouts.read()
-    if(event == 'button.saveExit'):
-        features = layouts.getListOfActiveFeats()
-        print('generated layout')
-    else:
-        exitApp = not(layouts.handleEvents(event, values))
+# layouts = LayoutManager()
+# exitApp = False
+# while(not(exitApp)):
+#     event, values = layouts.read()
+#     if(event == 'button.saveExit'):
+#         features = layouts.getListOfActiveFeats()
+#         print('generated layout')
+#     else:
+#         exitApp = not(layouts.handleEvents(event, values))
