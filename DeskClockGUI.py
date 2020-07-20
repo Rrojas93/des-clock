@@ -13,20 +13,12 @@
 #=========================================================================
 
 import PySimpleGUI as sg 
-import TimeUtils
-import DeskClockSettings 
-sg.theme('DarkAmber') # nicer color theme. (placeholder)
+import LayoutManager
+import DeskClockWindows
 #TODO: add a theme picker feature.
 
-_fixedResolution = (800, 480) # fixed resolution size for RPi Touch screen
-_screenResolution = sg.Window.get_screen_size()
-_screenResolution = _fixedResolution # Used to test and debug, comment out for variable screen sizes.
-_mainFontType = 'Everson Mono'
-_mainFontPair = (_mainFontType, 16)
-
-
-window = None # main window of application.
-settings = DeskClockSettings.loadSettings()
+windows = dict()
+activeWindow = None
 
 #------------------------------------------------------------
 #	main()
@@ -34,121 +26,56 @@ settings = DeskClockSettings.loadSettings()
 #           by "if __name__ == __main__" @ gottom of file.
 #------------------------------------------------------------
 def main():
-    createMainWindow(getMainLayout())
-    while (True):
-        event, values = window.read(timeout=1000) # times out every 1 second to perform other functions.
-        if(event == '-button.Exit-'):
-            window.close()
-            break
+    global windows
+    global activeWindow
+    windows['bg'] = DeskClockWindows.BGWindow()
+    windows['main'] = DeskClockWindows.MainWindow()
+    windows['layouts'] = None
+    activeWindow = windows['main']
+
+    while(activeWindow):
+        event, values = activeWindow.attend()
+        handleWindowEvents(event, values)
+    
+    closeAllWindows()
+
+def handleWindowEvents(event, values):
+    '''
+    Handles any events that are not handled or cant be handled by the class because of scope restraint.
+    '''
+    global activeWindow
+    global windows
+    if(event == sg.WINDOW_CLOSED or event == '-button.main.exit-'):
+        if(activeWindow == windows['layouts']):
+            activeWindow.close()
+            activeWindow = None 
+            activeWindow = windows['main']
         else:
-            mainWinEvents(event, values)
-            updateGUI() # updates visuals on every timout AND every user provoked event for responsiveness.
-    DeskClockSettings.saveSettings(settings) # save settings so that they persist on next load.
-
-#------------------------------------------------------------
-#	createMainWindow()
-#		Description: Creates the main window of the application.
-#------------------------------------------------------------
-def createMainWindow(layout):
-    global window 
-    window = sg.Window(
-        title='Desk Clock', 
-        layout=layout, 
-        font=_mainFontPair, 
-        no_titlebar=True, 
-        size=_screenResolution, 
-        resizable=True, 
-        auto_size_buttons=True, 
-        auto_size_text=True, 
-        keep_on_top=True, 
-        margins=(5,3), 
-        element_padding=(5,3), 
-        element_justification='center', 
-        finalize=True, 
-        )
-
-#------------------------------------------------------------
-#	getMainLayout()
-#		Description: returns the layout of the main 
-#           GUI window.
-#------------------------------------------------------------
-#TODO: seperate different into row info themes and add them in by a preference layout chosen by user.
-def getMainLayout():
-    timeFontSize = 64
-    ampmFontSize = 20
-    row_time = [[
-        sg.Column(element_justification='center', pad=(0,50), layout=[[
-            sg.Column(pad=((120,0), (0,0)), layout=[[
-                sg.Text('00:00', key='-text.altTime-', font=(_mainFontType, timeFontSize), pad=((0,0), (0,0))),
-                sg.Column(element_justification='left', key='-column.altTimeSpecs-', pad=(10,0), layout=[
-                    [sg.Text('PDT', key='-text.altTimeZone-', font=(_mainFontType, int(ampmFontSize/2)), pad=((0,0),(15,15)))],
-                    [sg.Text('PM', key='-text.altAmpm-', font=(_mainFontType, ampmFontSize), pad=((0,0), (0,0)), visible=not(settings.enableMilitaryTime))]
-                    ])
-                ]]),
-            sg.Column(pad=((40,0), (0,0)), layout=[[
-                sg.Text('00:00', key='-text.time-', font=(_mainFontType, timeFontSize), pad=((0,0), (0,0))),
-                sg.Column(element_justification='left', key='-column.timeSpecs-', pad=(10,0), layout=[
-                    [sg.Text(TimeUtils.getTimeZone(), key='-text.timeZone-', font=(_mainFontType, int(ampmFontSize/2)), pad=((0,0),(15,15)))],
-                    [sg.Text('PM', key='-text.ampm-', font=(_mainFontType, ampmFontSize), pad=((0,0), (0,0)), visible=not(settings.enableMilitaryTime))]
-                    ])
-                ]])
-            ]])
-        ]]
-
-    row_control = [[sg.Button('Military', key='-button.military-'), sg.Exit(key='-button.Exit-')]]
-
-    layout = []
-    layout += row_time
-    layout += row_control
-
-    return layout
-
-#------------------------------------------------------------
-#	mainWinEvents()
-#		Description: handles any GUI events
-#           from the main window of the application.
-#------------------------------------------------------------
-def mainWinEvents(event, values):
+            activeWindow.close()
+            activeWindow = None
     if(event == sg.TIMEOUT_EVENT):
-        # perform timeout events here.
-        updateTime()
-        # return since we know there are no user provoked events. 
-        return
-    if(event == '-button.military-'):
-        settings.enableMilitaryTime = not(settings.enableMilitaryTime)
-        window['-text.ampm-'].update(visible=not(settings.enableMilitaryTime))
-        window['-text.altAmpm-'].update(visible=not(settings.enableMilitaryTime))
-        updateTime()
+        activeWindow.update()
+        activeWindow.finalize()
+    if(event == '-button.main.layout-'):
+        activeWindow.close()
+        activeWindow = None
+        windows['layouts'] = LayoutManager.LayoutManager()
+        activeWindow = windows['layouts']
+    if(event == '-button.layouts.save-'):
+        listOfFeatures = activeWindow.getListOfActiveFeats()
+        activeWindow.close()
+        activeWindow = None
+        windows['main'] = DeskClockWindows.MainWindow(listOfFeatures=listOfFeatures)
+        activeWindow = windows['main']
 
-    # The following should be any user provoked events.
-
-
-#------------------------------------------------------------
-#	updateGUI()
-#		Description: Performs any GUI visual updates to the
-#           main window. 
-#------------------------------------------------------------
-def updateGUI():
-    # do any visual updates here
-
-    # finalize changes and apply on finish
-    window.finalize()
-
-#------------------------------------------------------------
-#	updateTime()
-#		Description: Updates the time displayed on the main
-#           window. This function also blinks the colon
-#           in between the hour and minute after every sec.
-#------------------------------------------------------------
-def updateTime():
-    t, ap = TimeUtils.getTime(settings.enableMilitaryTime)
-    tic = ':' if int(t.split(':')[-1]) % 2 == 0 else ' '
-    window['-text.time-'].Update(tic.join(t.split(':')[:-1]))
-    window['-text.ampm-'].Update(ap)
-
-    t, ap = TimeUtils.getTime(settings.enableMilitaryTime, adjust=-3)
-    tic = ':' if int(t.split(':')[-1]) % 2 == 0 else ' '
-    window['-text.altTime-'].Update(tic.join(t.split(':')[:-1]))
+def closeAllWindows():
+    '''
+    Close any remaining windows that are stored in memory.
+    '''
+    global windows
+    for w in windows.values():
+        if(w):
+            w.close()
 
 if __name__ == "__main__":
     main()
